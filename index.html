@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tic Tac Toe</title>
+<style>
+body {
+  font-family: Arial;
+  text-align: center;
+  background: #1e1e2f;
+  color: white;
+}
+.board {
+  display: grid;
+  grid-template-columns: repeat(3, 100px);
+  gap: 10px;
+  justify-content: center;
+  margin-top: 20px;
+}
+.cell {
+  width: 100px;
+  height: 100px;
+  background: #2e2e4d;
+  font-size: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border-radius: 10px;
+}
+.cell:hover { background: #3e3e6d; }
+.winner { background: #4caf50 !important; }
+
+#status { margin-top: 15px; font-size: 20px; }
+
+.scoreboard {
+  margin-top: 20px;
+  font-size: 18px;
+}
+
+button {
+  margin-top: 15px;
+  padding: 10px 20px;
+  font-size: 16px;
+  background: orange;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Tic Tac Toe</h1>
+
+<div class="scoreboard">
+  🏆 X Wins: <span id="xScore">0</span> |
+  O Wins: <span id="oScore">0</span> |
+  Draws: <span id="drawScore">0</span>
+</div>
+
+<div class="board" id="board"></div>
+
+<div id="status">Player X's Turn</div>
+
+<button onclick="restartGame()">Restart</button>
+
+<script>
+const board = document.getElementById("board");
+const statusText = document.getElementById("status");
+
+const xScoreText = document.getElementById("xScore");
+const oScoreText = document.getElementById("oScore");
+const drawScoreText = document.getElementById("drawScore");
+
+let currentPlayer = "X";
+let gameState = ["","","","","","","","",""];
+let gameActive = true;
+
+let xScore = 0;
+let oScore = 0;
+let drawScore = 0;
+
+const winPatterns = [
+  [0,1,2],[3,4,5],[6,7,8],
+  [0,3,6],[1,4,7],[2,5,8],
+  [0,4,8],[2,4,6]
+];
+
+gameState.forEach((_, index) => {
+  const cell = document.createElement("div");
+  cell.classList.add("cell");
+  cell.dataset.index = index;
+  cell.addEventListener("click", handleClick);
+  board.appendChild(cell);
+});
+
+function handleClick(e) {
+  const i = e.target.dataset.index;
+  if (gameState[i] || !gameActive) return;
+
+  gameState[i] = currentPlayer;
+  e.target.textContent = currentPlayer;
+
+  checkWinner();
+}
+
+function checkWinner() {
+  let win = null;
+
+  winPatterns.forEach(p => {
+    const [a,b,c] = p;
+    if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+      win = p;
+    }
+  });
+
+  if (win) {
+    win.forEach(i => board.children[i].classList.add("winner"));
+    statusText.textContent = "Player " + currentPlayer + " Wins!";
+    gameActive = false;
+
+    if (currentPlayer === "X") {
+      xScore++;
+      xScoreText.textContent = xScore;
+    } else {
+      oScore++;
+      oScoreText.textContent = oScore;
+    }
+    return;
+  }
+
+  if (!gameState.includes("")) {
+    statusText.textContent = "Draw!";
+    gameActive = false;
+
+    drawScore++;
+    drawScoreText.textContent = drawScore;
+    return;
+  }
+
+  currentPlayer = currentPlayer === "X" ? "O" : "X";
+  statusText.textContent = "Player " + currentPlayer + "'s Turn";
+}
+
+function restartGame() {
+  gameState = ["","","","","","","","",""];
+  gameActive = true;
+  currentPlayer = "X";
+  statusText.textContent = "Player X's Turn";
+
+  Array.from(board.children).forEach(cell => {
+    cell.textContent = "";
+    cell.classList.remove("winner");
+  });
+}
+</script>
+
+</body>
+</html>
